@@ -30,14 +30,14 @@ def extractDataFromAPI(url: str, API_KEY: str, maxPages: int = 500) -> pd.DataFr
     import requests
 
     #Checks if the url and API KEY have been provieded
-    if url == None and API_KEY == None:
-        return f"Provide URL and API Key to continue with the operation"
+    if url is None and API_KEY is None:
+        raise ValueError("URL and API Key are required but were not provided.")
     
-    elif url == None:
-        return f"No URL was provided. Provide a valid URL"
+    elif url is None:
+        raise ValueError("URL is required but was not provided.")
     
-    elif API_KEY == None:
-        return f"No API KEY was provided"
+    elif API_KEY is None:
+        raise ValueError("API key is required but missing.")
     
     #Strips off any witespace from the url and the API Key
     url, API_KEY = url.strip(), API_KEY.strip()
