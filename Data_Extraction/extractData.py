@@ -1,3 +1,5 @@
+class ApiRequestError(Exception):
+    """Base class for API request errors."""
 
 #Imports pandas
 import pandas as pd
@@ -66,13 +68,13 @@ def extractDataFromAPI(url: str, API_KEY: str, maxPages: int = 500) -> pd.DataFr
             response.raise_for_status()
 
         except requests.exceptions.Timeout:
-            return "Request timed out. Check your internet connection and try again"
+            raise ApiRequestError("Request timed out. Check your internet connection and try again.")
         except requests.exceptions.ConnectionError:
-            return "Unable to connect to server. Check your internet connection or the API URL"
+            raise ApiRequestError("Unable to connect to server. Check your internet connection or the API URL.")
         except requests.exceptions.HTTPError:
-            return f"HTTP Error {response.status_code}"
+            raise ApiRequestError(f"HTTP Error {e.response.status_code}: {e.response.reason}")
         except requests.exceptions.RequestException as e:
-            return f"Network error: {e}"
+            raise ApiRequestError(f"Network error: {e}")
 
         #Safe json parse
         try:
