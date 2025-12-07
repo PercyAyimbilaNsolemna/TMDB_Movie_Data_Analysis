@@ -27,6 +27,10 @@ def loadEnv(fileName: str) -> str:
 
     return data if data != None else f"{fileName} was not found in the .env file"
 
+#Defines a function that returns the API url
+def getURL()-> str:
+    return "https://api.themoviedb.org/3/discover/movie"
+
 
 
 def main():

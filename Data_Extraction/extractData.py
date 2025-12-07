@@ -109,9 +109,9 @@ def main():
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     sys.path.append(project_root)
 
-    from Config.config import loadEnv
+    from Config.config import loadEnv, getURL
 
-    url = "https://api.themoviedb.org/3/discover/movie"
+    url = getURL()
     API_KEY = loadEnv(fileName="API_KEY")
     data = extractDataFromAPI(url, API_KEY, maxPages=2)
     print(data.head())
