@@ -29,7 +29,11 @@ def loadEnv(fileName: str) -> str:
 
 #Defines a function that returns the API url
 def getURL()-> str:
-    return "https://api.themoviedb.org/3/discover/movie"
+    """
+    https://api.themoviedb.org/3/movie/299534?language=en-US&append_to_response=credits&api_key={{api_key}}
+    
+    """
+    return "https://api.themoviedb.org/3/movie"
 
 
 #Defines a function that creates a session for the retry logic
@@ -64,9 +68,6 @@ def create_retry(total: int = 3,
     from requests.adapters import HTTPAdapter
     from urllib3.util.retry import Retry
 
-    #Creates a session
-    session = requests.Session()
-
     retries = Retry(
         total=total,
         backoff_factor=backoff_factor,
@@ -76,7 +77,10 @@ def create_retry(total: int = 3,
 
     adapter = HTTPAdapter(max_retries=retries)
 
-    session.mount("https://", adapter)
+    #Creates a session
+    session = requests.Session()
+
+    session.mount("http://", adapter)
 
     session.mount("https://", adapter)
 
@@ -84,7 +88,8 @@ def create_retry(total: int = 3,
 
 
 def main():
-    print(f"The API key is : \n{loadEnv(fileName="API_KEY")}")
+    #print(f"The API key is : \n{loadEnv(fileName="API_KEY")}")
+    ...
 
 
 if __name__ == "__main__":

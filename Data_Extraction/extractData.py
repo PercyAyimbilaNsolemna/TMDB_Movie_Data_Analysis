@@ -3,34 +3,32 @@ class ApiRequestError(Exception):
 
 #Imports pandas
 import pandas as pd
+from typing import Optional
+import requests
 
-"""
-    TODO:
-
-    Store extracted data from the API locally as CSV file
-
-    Define a function to load the locally stored data as a pandas dataframe
-
-    Add retries to the API call
-
-    Add logging to the API call
-
-
-"""
 
 #Defines a function that fetches data from an API and converts the data to a dataframe
-def extractDataFromAPI(url: str, API_KEY: str, maxPages: int = 500) -> pd.DataFrame: # Add return type pd.DataFrame
+def extractDataFromAPI(session: Optional[requests.Session], 
+                       url: str, 
+                       API_KEY: str,
+                       movie_ids: list) -> pd.DataFrame: # Add return type pd.DataFrame
     """
 
     Queries an API (Movie Dataset API), extracts the dataset and convert it to a pandas dataFrame
 
     Parameters
     ----------
+    sesssion    :   Session Object
+                    Session object to handle retry logic
+
     url :   str
         The URL for the API
 
     API_KEY : str
             The API KEY for authentication
+
+    movie_ids   :   list
+                List of IDs for movies to be extracted
 
     maxPages    :   int
                 Sets the default to 500
@@ -38,12 +36,12 @@ def extractDataFromAPI(url: str, API_KEY: str, maxPages: int = 500) -> pd.DataFr
 
     Returns:
     -------
-    pd.dataFrame
-        DataFRame of all the data from the API (all movies from the Movie Dataset API)
+    CSV file
+        CSV of all the data from the API (all movies from the Movie Dataset API)
 
     """
-
-    import requests
+    import logging
+    import json
 
     #Checks if the url and API KEY have been provieded
     if url is None and API_KEY is None:
@@ -54,6 +52,10 @@ def extractDataFromAPI(url: str, API_KEY: str, maxPages: int = 500) -> pd.DataFr
     
     elif API_KEY is None:
         raise ValueError("API key is required but missing.")
+    
+    #Validation for movied IDs
+    if not movie_ids:
+        raise ValueError("Movie ID list cannot be empty")
     
     #Strips off any witespace from the url and the API Key
     url, API_KEY = url.strip(), API_KEY.strip()
@@ -67,20 +69,16 @@ def extractDataFromAPI(url: str, API_KEY: str, maxPages: int = 500) -> pd.DataFr
     #Creates a dataFrame to store the movie dataset
     df = pd.DataFrame()
 
-    #Declares and initialize page to the first page
-    page = 1
-
-    while page <= maxPages:
-        params = {
-            "page": page,
+    params = {
             "include_adult": True,
             "language": "en-US"
         }
 
+    for count, movie_id in enumerate(movie_ids, start=1):
+        endpoint = f"{url}/{movie_id}"
         try:
-            response = requests.get(url, headers=headers, params=params, timeout=10)
-            response.raise_for_status()
-
+            response = session.get(url=endpoint, headers=headers, params=params, timeout=10)
+        
         except requests.exceptions.Timeout:
             raise ApiRequestError("Request timed out. Check your internet connection and try again.")
         except requests.exceptions.ConnectionError:
@@ -90,28 +88,28 @@ def extractDataFromAPI(url: str, API_KEY: str, maxPages: int = 500) -> pd.DataFr
         except requests.exceptions.RequestException as e:
             raise ApiRequestError(f"Network error: {e}")
 
+        #Proceed with the necessary details when call was successful 
+        # Handle 404 Not Found
+        if response.status_code == 404:
+            #logger.info("Movie ID %s not found (404). Skipping.", movie_id)
+            #failed_ids.append((movie_id, "not_found"))
+            continue
+
+
         #Safe json parse
         try:
-            json_data = response.json()
+            json_data = json.loads(response.text)
         except ValueError:
             return "Invalid JSON received."
 
-        results = json_data.get("results", [])
 
-        if not results:
+        if not json_data:
             break
 
-        page_df = pd.json_normalize(results)
+        movie_df = pd.json_normalize(json_data)
 
         #Concat the page_df to the main df
-        df = pd.concat([df, page_df], ignore_index=True)
-
-        print(f"Page {page} loaded ({len(page_df)} rows)")
-
-        if page >= json_data.get("total_pages", 0):
-            break
-
-        page += 1
+        df = pd.concat([df, movie_df], ignore_index=True)
 
     return df
     
@@ -123,12 +121,16 @@ def main():
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     sys.path.append(project_root)
 
-    from Config.config import loadEnv, getURL
+    from Config.config import loadEnv, getURL, create_retry
 
     url = getURL()
     API_KEY = loadEnv(fileName="API_KEY")
-    data = extractDataFromAPI(url, API_KEY, maxPages=2)
+    movie_ids = [299534, 19995, 140607, 299536, 597, 135397, 420818, 24428, 168259, 99861,
+                    284054, 12445, 181808, 330457, 351286, 109445, 321612, 260513]
+
+    data = extractDataFromAPI(session=create_retry(), url=url, API_KEY=API_KEY, movie_ids=movie_ids)
     print(data.head())
 
+
 if __name__ == "__main__":
-    main()
+        main()
