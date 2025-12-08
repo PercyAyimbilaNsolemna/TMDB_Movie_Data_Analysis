@@ -4,6 +4,20 @@ class ApiRequestError(Exception):
 #Imports pandas
 import pandas as pd
 
+"""
+    TODO:
+
+    Store extracted data from the API locally as CSV file
+
+    Define a function to load the locally stored data as a pandas dataframe
+
+    Add retries to the API call
+
+    Add logging to the API call
+
+
+"""
+
 #Defines a function that fetches data from an API and converts the data to a dataframe
 def extractDataFromAPI(url: str, API_KEY: str, maxPages: int = 500) -> pd.DataFrame: # Add return type pd.DataFrame
     """
