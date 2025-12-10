@@ -27,7 +27,7 @@ def convertNumeric(data: pd.DataFrame, columns: list, value: int) -> pd.DataFram
     for col in columns:
         if col in data.columns:
             # Scale the data in the column
-            data[col] = data[col] / value
+            data[col] = (data[col] / value).round().astype(int)
             data.rename(columns={col: f"{col}_musd"}, inplace=True)
 
         else:
