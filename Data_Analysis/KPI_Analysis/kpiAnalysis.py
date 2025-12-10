@@ -1,29 +1,5 @@
 import pandas as pd
 
-#Defines a function that returns the dataFrame ordered in ascending order based on the given column
-def rankColumn(data: pd.DataFrame, column: str, order: str) -> pd.DataFrame:
-    """
-    Ranks movies using the column nad the order provided
-    
-    :Parameters
-
-    data    :   pandas DataFrame
-            The dataFrame to perform the operation on
-
-    column  : str
-            The column to use to rank the movies or the data
-
-    order   :   str
-            How to arrange the movies or data in the dataFrame. Asc or Desc
-
-    :Return
-    data    :   pandas DataFrame
-            The ranked pandas DataFrame
-
-        
-    """
-    ...
-
 def rankColumn(data: pd.DataFrame, column: str, order: str = "asc") -> pd.DataFrame:
     """
     Ranks movies using a specified column and order.
@@ -65,6 +41,39 @@ def rankColumn(data: pd.DataFrame, column: str, order: str = "asc") -> pd.DataFr
     # Reset index for a clean rank
     data.reset_index(drop=True, inplace=True)
 
+    return data
+
+#Defines a function that calculates the profit
+def calculateProfit(data:pd.DataFrame, revenueColumn: str, budgetColumn: str) -> pd.DataFrame:
+    """
+    Calculates the profit for every movie using the revenue and budget columns and creates a 
+    new column to store the profits
+    
+    :Parameter:
+
+    data    :   pandas DataFrame
+            Data to be used for the profit calculation
+
+    revenueColumn   :   str
+                The name of the revenue column
+
+    budgetColumn    :   str
+                The name of the budget column
+
+    
+    :Return
+
+    data    :   pandas DataFrame
+            
+    """
+     # Validate columns exist
+    for col in [revenueColumn, budgetColumn]:
+        if col not in data.columns:
+            print(f"Column '{col}' not found in DataFrame.")
+            return data
+        
+    # Calculate profit and craete a new column to store the profit
+    data["profit"] = data[revenueColumn] - data[budgetColumn]
     return data
 
 
