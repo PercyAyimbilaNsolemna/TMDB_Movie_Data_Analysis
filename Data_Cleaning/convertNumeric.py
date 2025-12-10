@@ -28,7 +28,7 @@ def convertNumeric(data: pd.DataFrame, columns: list, value: int) -> pd.DataFram
         if col in data.columns:
             # Scale the data in the column
             data[col] = data[col] / value
-            data.rename(columns={col: f"{col} Million USD"}, inplace=True)
+            data.rename(columns={col: f"{col}_musd"}, inplace=True)
 
         else:
             print(f"Column '{col}' not found, skipping.")
