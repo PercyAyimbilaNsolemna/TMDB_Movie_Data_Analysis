@@ -76,6 +76,29 @@ def calculateProfit(data:pd.DataFrame, revenueColumn: str, budgetColumn: str) ->
     data["profit"] = data[revenueColumn] - data[budgetColumn]
     return data
 
+def calculateROI(data: pd.DataFrame, revenueColumn: str, budgetColumn: str) -> pd.DataFrame:
+    """
+    Docstring for calculateROI
+    
+    :param data: Description
+    :type data: pd.DataFrame
+    :param revenueColumn: Description
+    :type revenueColumn: str
+    :param budgetColumn: Description
+    :type budgetColumn: str
+    :return: Description
+    :rtype: DataFrame
+    """
+    # Validate columns exist
+    for col in [revenueColumn, budgetColumn]:
+        if col not in data.columns:
+            print(f"Column '{col}' not found in DataFrame.")
+            return data
+        
+    # Calculate profit and craete a new column to store the profit
+    data["ROI"] = (data[revenueColumn] / data[budgetColumn]).round().astype(int)
+    return data
+
 
 def main():
     ...
