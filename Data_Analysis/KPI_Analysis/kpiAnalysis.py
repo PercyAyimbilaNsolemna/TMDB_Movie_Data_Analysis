@@ -100,6 +100,29 @@ def calculateROI(data: pd.DataFrame, revenueColumn: str, budgetColumn: str) -> p
     return data
 
 
+#Defines a function that checks if a specific data exists in the dataFrame
+def dataExist(data: pd.DataFrame, keyword: str) -> bool:
+    """
+    Docstring for dataExist
+    
+    :param data: Description
+    :type data: pd.DataFrame
+    :param keyword: Description
+    :type keyword: str
+    :return: Description
+    :rtype: bool
+    """
+
+    cols = data.apply(lambda col: col.astype(str).str.contains(keyword, na=False).any())
+    
+    if len(cols[cols].index.tolist()) != 0:
+        print(f"The columns that have such data is/are \n{cols[cols].index.tolist()}")
+        return True
+    else:
+        print(f"None of the columns have the {keyword}")
+        return False
+
+
 def main():
     ...
 
