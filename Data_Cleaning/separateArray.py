@@ -2,7 +2,7 @@ import pandas as pd
 import ast
 import numpy as np
 
-def separateArray(data: pd.DataFrame, columns: dict) -> pd.DataFrame:
+def separateArray(data: pd.DataFrame, columns: dict, separator: str=" | ") -> pd.DataFrame:
     """
     Converts JSON-like array columns into pipe (|) separated strings.
 
@@ -30,14 +30,14 @@ def separateArray(data: pd.DataFrame, columns: dict) -> pd.DataFrame:
      # Apply transformation to each column
     for col, key in columns.items():
         if col in data.columns:
-            data[col] = data[col].apply(lambda value: extract_key(value, key))
+            data[col] = data[col].apply(lambda value: extract_key(value, key, separator))
         else:
             print(f"Column '{col}' not found in dataset. Skipping.")
 
     return data
 
 
-def extract_key(value, key):
+def extract_key(value, key, separator):
     """
     Extracts values for the specified keys and separate them with a Pipe (|)
     
@@ -69,7 +69,7 @@ def extract_key(value, key):
         # Extract values using dynamic key
         values = [item.get(key) for item in value if isinstance(item, dict) and key in item]
 
-        return "|".join(map(str, values)) if values else np.nan
+        return separator.join(map(str, values)) if values else np.nan
 
     except Exception:
         return np.nan

@@ -1,17 +1,24 @@
 class ApiRequestError(Exception):
     """Base class for API request errors."""
 
-#Imports pandas
 import pandas as pd
-from typing import Optional
 import requests
+import json
+import os
+from typing import Optional
 
 
-#Defines a function that fetches data from an API and converts the data to a dataframe
+class ApiRequestError(Exception):
+    """Base class for API request errors."""
+    pass
+
+
 def extractDataFromAPI(session: Optional[requests.Session], 
                        url: str, 
                        API_KEY: str,
-                       movie_ids: list) -> pd.DataFrame: # Add return type pd.DataFrame
+                       movie_ids: list,
+                       output_path: str = "../data/movieData.csv") -> None:
+    
     """
 
     Queries an API (Movie Dataset API), extracts the dataset and convert it to a pandas dataFrame
@@ -36,82 +43,77 @@ def extractDataFromAPI(session: Optional[requests.Session],
 
     Returns:
     -------
-    CSV file
-        CSV of all the data from the API (all movies from the Movie Dataset API)
+    None
 
     """
-    import logging
-    import json
 
-    #Checks if the url and API KEY have been provieded
-    if url is None and API_KEY is None:
-        raise ValueError("URL and API Key are required but were not provided.")
-    
-    elif url is None:
-        raise ValueError("URL is required but was not provided.")
-    
-    elif API_KEY is None:
-        raise ValueError("API key is required but missing.")
-    
-    #Validation for movied IDs
+    #  VALIDATION 
+    if url is None or API_KEY is None:
+        raise ValueError("URL and API Key are required.")
+
     if not movie_ids:
         raise ValueError("Movie ID list cannot be empty")
-    
-    #Strips off any witespace from the url and the API Key
-    url, API_KEY = url.strip(), API_KEY.strip()
 
-    #Construct the structure of the header
+    url = url.strip()
+    API_KEY = API_KEY.strip()
+
+    #  REQUEST SETTINGS 
     headers = {
-    "Authorization": f"Bearer {API_KEY}",
-    "Accept": "application/json"
+        "Authorization": f"Bearer {API_KEY}",
+        "Accept": "application/json"
     }
-    
-    #Creates a dataFrame to store the movie dataset
-    df = pd.DataFrame()
 
     params = {
-            "include_adult": True,
-            "language": "en-US"
-        }
+        "include_adult": True,
+        "language": "en-US",
+        "append_to_response": "credits"  # includes cast + crew
+    }
 
-    for count, movie_id in enumerate(movie_ids, start=1):
+    df = pd.DataFrame()
+
+    # FETCH MOVIE DATA 
+    for movie_id in movie_ids:
+
         endpoint = f"{url}/{movie_id}"
+
         try:
-            response = session.get(url=endpoint, headers=headers, params=params, timeout=10)
-        
+            response = session.get(
+                url=endpoint,
+                headers=headers,
+                params=params,
+                timeout=10
+            )
         except requests.exceptions.Timeout:
-            raise ApiRequestError("Request timed out. Check your internet connection and try again.")
+            raise ApiRequestError("Request timed out.")
         except requests.exceptions.ConnectionError:
-            raise ApiRequestError("Unable to connect to server. Check your internet connection or the API URL.")
-        except requests.exceptions.HTTPError:
-            raise ApiRequestError(f"HTTP Error {e.response.status_code}: {e.response.reason}")
+            raise ApiRequestError("Connection error.")
         except requests.exceptions.RequestException as e:
             raise ApiRequestError(f"Network error: {e}")
 
-        #Proceed with the necessary details when call was successful 
-        # Handle 404 Not Found
         if response.status_code == 404:
-            #logger.info("Movie ID %s not found (404). Skipping.", movie_id)
-            #failed_ids.append((movie_id, "not_found"))
+            # Skip missing movie IDs
             continue
 
-
-        #Safe json parse
+        # Safe JSON parse
         try:
-            json_data = json.loads(response.text)
+            json_data = response.json()
         except ValueError:
-            return "Invalid JSON received."
-
-
-        if not json_data:
-            break
+            continue
 
         movie_df = pd.json_normalize(json_data)
-
-        #Concat the page_df to the main df
         df = pd.concat([df, movie_df], ignore_index=True)
 
-    return df
+    # SAVE TO CSV 
+
+    # Create directory if missing
+    output_dir = os.path.dirname(output_path)
+    if output_dir and not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    df.to_csv(output_path, index=False)
+
+    print(f"Movie data saved to: {output_path}")
+
     
 
 def main():

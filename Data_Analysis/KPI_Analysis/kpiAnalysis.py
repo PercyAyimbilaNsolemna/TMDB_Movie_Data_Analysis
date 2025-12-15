@@ -1,4 +1,5 @@
 import pandas as pd
+from pandas.core.groupby.generic import DataFrameGroupBy
 
 def rankColumn(data: pd.DataFrame, column: str, order: str = "asc") -> pd.DataFrame:
     """
@@ -99,6 +100,43 @@ def calculateROI(data: pd.DataFrame, revenueColumn: str, budgetColumn: str) -> p
     data["ROI"] = (data[revenueColumn] / data[budgetColumn]).round().astype(int)
     return data
 
+#Defines a function that calculates central tendency (mean, mode and median of a given column)
+def calculateCentralTendency(data: pd.DataFrame | DataFrameGroupBy, column: str, measure: str) -> pd.Series | str:
+    """
+    Docstring for calculateCentralTendency
+    
+    :param data: Description
+    :type data: pd.DataFrame
+    :param column: Description
+    :type column: str
+    :param measure: Description
+    :type measure: str
+    :return: Description
+    :rtype: Series[Any]
+    """
+
+    # Determine which columns to check depending on input type
+    if isinstance(data, DataFrameGroupBy):
+        cols = data.obj.columns
+    else:
+        cols = data.columns
+
+    # Validate column
+    if column not in cols:
+        return f"The column '{column}' is not in the DataFrame."
+
+    # Fix measure argument
+    measure = measure.lower()
+
+    valid_measures = {"mean", "median", "mode"}
+
+    if measure not in valid_measures:
+        return f"Invalid measure '{measure}'. Must be one of: {valid_measures}"
+
+    # Perform calculation
+    return getattr(data[column], measure)()
+
+
 
 #Defines a function that checks if a specific data exists in the dataFrame
 def dataExist(data: pd.DataFrame, keyword: str) -> bool:
@@ -114,7 +152,7 @@ def dataExist(data: pd.DataFrame, keyword: str) -> bool:
     """
 
     cols = data.apply(lambda col: col.astype(str).str.contains(keyword, na=False).any())
-    
+
     if len(cols[cols].index.tolist()) != 0:
         print(f"The columns that have such data is/are \n{cols[cols].index.tolist()}")
         return True
