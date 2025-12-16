@@ -47,7 +47,7 @@ The codebase is modular, extensible, and follows **best practices in data valida
 |   
 |── Data Analysis/
 |   ├── Data Visualization/          # All functions related to data visualization
-│   ├── KPI Analysis/                # Handles all KPI Analysis Logic
+│   └── KPI Analysis/                # Handles all KPI Analysis Logic
 |                              
 ├── notebooks/                      # Presents the entire workflow in a clear and concise manner
 │
@@ -232,6 +232,7 @@ This project is licensed under the MIT License.
 ## Author
 
 Percy Ayimbila Nsolemna
+
 Data Scientist | Machine Learning Engineer
 
 ## Acknowledgements
