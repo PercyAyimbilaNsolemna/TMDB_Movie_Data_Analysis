@@ -51,7 +51,7 @@ def create_retry(total: int = 3,
     total : int
             The maximum retries
 
-    backoff_factor  :   int
+    backoff_factor  :   float
                 The base delay before another retry request is made
 
     status_forcelist    :   tuple

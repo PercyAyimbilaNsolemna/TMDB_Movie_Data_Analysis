@@ -131,7 +131,7 @@ def main():
                     284054, 12445, 181808, 330457, 351286, 109445, 321612, 260513]
 
     data = extractDataFromAPI(session=create_retry(), url=url, API_KEY=API_KEY, movie_ids=movie_ids)
-    print(data.head())
+    #print(data.head())
 
 
 if __name__ == "__main__":

@@ -32,11 +32,7 @@ The codebase is modular, extensible, and follows **best practices in data valida
 │   └── requirements.txt           # Project dependencies
 │
 ├── Data_Extraction/
-│   ├── api/                        # API extraction utilities
-│   ├── preprocessing/              # Cleaning & transformation logic
-│   ├── analysis/                   # Ranking, filtering & aggregations
-│   ├── visualization/              # Matplotlib visualizations
-│   └── utils/                      # Reusable helper functions
+│   ├── extractData/                #Extracts data from the API
 │
 ├── Data Cleaning/
 |   ├── convertDataType              # Converts the DataType of a specified column
